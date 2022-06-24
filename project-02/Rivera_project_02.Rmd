@@ -1,0 +1,202 @@
+---
+title: "Mini-Project 02 Revised"
+subtitle: "Krystal Rivera Analysis"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+    toc_float: true
+---
+
+# Data Visualization Mini-Project 02 Revised
+
+<p style='text-align: justify;'>This report is an expansion from my previous project ['Rivera Mini Project 1'](https://rpubs.com/Krvera7522/913722) were I explored the same data set. For this project 'Rivera Mini Project 2', I wanted to expand my understanding of the data through interactive plots, spatial, linear and coefficient model visualizations.</p> 
+
+
+```{r, message=FALSE, warning=FALSE}
+# Loading the data and libraries to prepare for the exploration ahead.
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+# For Interactive Model, you only really need to use 'plotly' the rest are mostly for spicing up your models
+library(plotly)
+library(htmlwidgets)
+library(scatterplot3d)
+library(rgl)
+
+# For Spatial Visualization
+library(sf)
+library(maps)
+# For Model Visualization
+library(broom)
+
+df <- read_csv("../data/marathon_results_2017.csv", col_types = cols())
+
+# Renaming the M/F column as Sex
+colnames(df)[4] <- 'Sex' # Renaming the M/F Column to Sex
+colnames(df)[19]<- 'OfficialTime' # Renaming the Official Time column to OfficialTime (removing the space)
+colnames(df)[7]<-'ISO_A3' # Renaming the Countries column name to ISO_A3 to match the world map
+```
+
+ To further understand and interact with the data I asked myself a series of questions:
+
+  1. What relationships can be found among Age and Pace?
+  2. What is the distribution of participants around the world?
+  3. What is the impact of age on pace and official time?
+
+For which I had planned to create the following graphs and plots:
+<ol>
+  <li style='text-align: justify;'> An interactive hexagonal heat map of Pace vs Age. This graph would allow the user to focus on a specific region at a time. Zooming in would allow the user to see the concentration of data points, which would facilitate the examination process.</li>
+  
+  <li style='text-align: justify;'> A spatial graph that would mapped the countries of the world and illustrates through colors the concentration of participants origins.</li>
+  
+  <li style='text-align: justify;'> A linear model to illustrate if there was or is any correlation between the variables age and pace, along with its corresponding coefficient plot.</li>
+</ol>
+<p style='text-align: justify;'>The process and methods used to explore the answers to the previously mentioned questions are showcase below; including the necessary steps for cleaning and preparing the data. A summary of the findings will also be included below each exploration  of the question  and these go as follow:</p>
+
+<h3>1.<span style="color:purple;"> What relationships can be found among Sex, Age, and Pace?</span></h3>
+
+
+```{r}
+library(hexbin)
+
+d<-ggplot(df, aes(Pace, Age))+ geom_hex()+theme_classic()+labs(title = 'Concentration of Participants Among Age and Pace', x = 'Age', y = 'Pace')
+  
+  
+
+Pace_plot<-ggplotly(d)  # Creating interactive plot
+Pace_plot
+
+```
+
+
+<h3 style="color:green;">__Findings__</h3>
+
+> <p style='text-align: justify;'>After interacting with the plot one can see, from the distribution of points, that there are more males than females. Nonetheless, we can further examine the information on females. This interactive graph makes it possible to look at the relationship of a specific sex with Age and Pace by turning the respective data points invisible. One can see in both females and males that the runners with the fastest time tend to be younger in age. The pattern found at the bottom of the distribution for each gender, illustrates such finding. Upon further examination, one can see by zooming in on the upper-left corner, that females tend to have a slower pace than males in that region.</p> 
+
+```{r}
+# self-contained HTML version of Pace_plot
+
+saveWidget(Pace_plot, "Interactive Pace_plot.html")
+```
+
+Moving on to the next question:
+
+<h3>2.<span style="color:purple;"> What is the distribution of participants around the world?</span></h3>
+
+Loading a World map.
+
+```{r load-libraries-data, warning=FALSE, message=FALSE}
+library(sf)
+# Load world shapefile from Natural Earth
+# https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
+world_shapes <- read_sf("../data/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp")
+  #"C:/Users/kryst/OneDrive/Documents/SUMMER A/Data Visualization & Reproductible Research/Projects/02_Mini_Project_2/Data/ne_110m_admin_0_countries/ne_110m_admin_0_countries.shp")
+
+```
+
+<p style='text-align: justify;'>Filtering the data by using the 'group_by()' function. We want to isolate the data by Countries as we are interested in the amount of participants that come from each location.</p>
+
+```{r}
+# Filtering the data by ISO_A3 (country)
+
+Country <- df %>%
+  group_by(ISO_A3) %>%
+  summarize(Total = n(), .groups = 'drop')
+
+```
+
+<p style='text-align: justify;'>Combining the count of participants to the world map by ISO_A3 (countries), this will help in to graph the map.</p>
+
+```{r combine-shapefile-internet-users}
+
+users_map <- world_shapes %>%
+  left_join(Country, by = "ISO_A3") %>%
+  # Remove Antarctica
+filter(ISO_A3 != "ATA")
+  
+```
+
+Making the spatial visualization.
+
+```{r}
+# Make a map of internet users with ggplot() + geom_sf()
+ggplot(data = users_map) +
+
+geom_sf(aes(fill = Total), size = 0.5) +
+  labs(title = "Proportion of Participants around the World",fill = "Participant Concentration") +
+  scale_fill_viridis_c(option = "turbo",trans = "log2") +
+  theme_void() +
+  theme(legend.position = "bottom",legend.key.width= unit(1, "in"),legend.key.height = unit(.3, "cm"),plot.title = element_text(hjust = 0.5),plot.background = element_rect(fill = "white", color = NA))
+```
+
+<h3 style="color:green;">__Findings__</h3>
+
+> <p style='text-align: justify;'>The spatial plot above illustrates the concentration of the participants origins in the 2017 Boston marathon. From the graph one can see that most participants came from the United States and that Africa seems to be underrepresented. Nevertheless, there was a good mixture of representation from different countries across the globe.</p>
+
+Moving on to the final question:
+
+<h3>3.<span style="color:purple;"> What is the impact of age on pace and official time?</span></h3>
+
+First, lets graph both a linear model between Age and Pace and a linear model between Age and Official Time.
+
+Below is the graph for the "Linear Model of Age vs. Pace:
+
+```{r message=FALSE, warning=FALSE}
+f <- filter(df, Age == (20:45)) # Looking between the ages of 20 and 45
+```
+
+
+```{r message=FALSE, warning=FALSE}
+
+ggplot(f, aes(x = Age, y = Pace)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              formula = "y ~ x") + 
+  theme_minimal()+
+  labs(title='Linear Model of Age vs. Pace')
+```
+
+Below is the graph for the "Linear Model of Age vs. Pace:
+
+```{r message=FALSE, warning=FALSE}
+ggplot(f, aes(x = Age, y = OfficialTime)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              formula = "y ~ x") + 
+  theme_minimal()+
+  labs(title='Linear Model of Age vs. official Time')
+```
+
+<h3 style="color:green;">__Findings__</h3>
+
+> <p style='text-align: justify;'>There seems to be a positive relationship among the variable, but since it's difficult for the naked eye to see if there is a positive slope or not, we will expand the exploration a bit more. Let's further explore the relationship between the variables by graphing a coefficient plot that describes the relationship of 'Pace' and 'Official Time' with 'Age'.</p>
+
+Creating a coefficient plot:
+
+```{r message=FALSE, warning=FALSE}
+library(coefplot) # Loading the coefplot library
+Age_Pace <- glm(Age ~ Pace + OfficialTime + Age, data = df)
+
+AP_coefs <- tidy(Age_Pace, conf.int = TRUE) %>% 
+  filter(term != "(Intercept)") 
+AP_coefs
+
+coefplot(Age_Pace)+
+  labs(title= 'Coefficient Plot of Official Time and Pace with Respect to Age')
+```
+
+<h3 style="color:green;">__Findings__</h3>
+
+> <p style='text-align: justify;'>Looking at the linear model, there's a possibility of assuming that there might be a positive relationship between the variables Pace and Age. But, upon completing a further exploration through the coefficient plot, one can see that non of the variables hold any statistical significance. Hence, it nulls the initial assumption of there being a positive relationship between the variables. The results make sense, as there are young runners with both a fast and lower pace as well as older runners with a fast and lower pace. Which illustrates that age does not inhibits runners from achieving a faster pace that results in a overall faster official time, at least in terms of the models statistical significance.</p>
+
+<h3 style="color:black;">__Conclusion__</h3>
+
+<p style='text-align: justify;'>The expansion of the previous project, helped to analyze the data further by using other methods like, interactive plots, spatial visualizations, and linear and coefficient plots. The first graph showed that there's a higher concentration of participants between the age of 30-50 with a total pace of 00:08:00 and that the participants with the fastest time tend to be younger in age.</p>
+
+<p style='text-align: justify;'>The second graph aided in demonstrating how many participants came from different places. It helped answer the questions of which country was under represented and most represented, which resulted in Africa and United States respectively.</p>
+
+<p style='text-align: justify;'>Last but not least, the third graph showed that age and pace were unrelated. Age is not a factor when it comes to the pace that a participant can achieve. There might be a misconception that younger people will always be faster than older people and this graph shows that that is not the case.</p>
+
+<p style='text-align: justify;'>For future work, more restrictions can be used when filtering the data. Also, the aesthetics of the graphs and plots could be developed further to match a theme.</p>
+
