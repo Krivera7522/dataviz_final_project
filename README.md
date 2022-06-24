@@ -33,14 +33,12 @@ In this project, I wanted to expand my understanding of the data through interac
 
 **Sample data visualization:** 
 
-<img src="https://github.com/reisanar/dataviz_final_project/blob/main/figures/fl_higher_ed.png" width="60%" height="60%">
-
-(you can also place your figures in the `figures/` folder and use the `![](path_to_picture)` option to add the pictures here)
+<img src="https://github.com/Krivera7522/dataviz_final_project/blob/master/project-02/Rivera_project_02_files/figure-html/unnamed-chunk-5-1.png" width="60%" height="60%">
 
 
 ## Project 03
 
-In this project, I explored ... _[short description of your revised project goes here]_
+In this project, I attempted to reproduce different charts exploring the distribution of maximum temperatures in the city of Tampa, based on weather station at the TPA facility.
 
 **Sample data visualization:** 
 
