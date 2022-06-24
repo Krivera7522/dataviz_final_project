@@ -43,7 +43,7 @@ In this project, I attempted to reproduce different charts exploring the distrib
 **Sample data visualization:** 
 
 _[include your favorite visualization from this project here]_
-<img src="https://github.com/reisanar/figs/raw/master/jackie_jessie_marion.png" width="80%" height="80%">
+<img src="https://github.com/Krivera7522/dataviz_final_project/blob/master/project-03/Rivera_project_03_files/figure-html/unnamed-chunk-14-1.png" width="80%" height="80%">
 
 
 ### Moving Forward
