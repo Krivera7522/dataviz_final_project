@@ -1,8 +1,8 @@
 # Data Visualization and Reproducible Research
 
-> Firstname Lastname. 
+> Krystal Rivera. 
 
-Learn more about me in my [GitHub profile page](https://github.com/reiminer)
+Learn more about me in my [GitHub profile page](https://github.com/Krivera7522/Krivera7522)
 
 
 The following is a sample of products created during the _"Data Visualization and Reproducible Research"_ course.
@@ -10,7 +10,7 @@ The following is a sample of products created during the _"Data Visualization an
 
 ## Project 01
 
-In the `project_01/` folder you can find... _[short description of your revised project goes here]_
+In the `project_01/` folder you can find a revised version of my [Mini Project 01](https://rpubs.com/Krvera7522/913722), which was completed to demonstrate the development of skills learned throughout the course, and to put into practice the principles of data visualization explored through different provided materials. The data frame used for the analysis is “marathon_results_2017.csv”, provided by Professor Rei Sanchez. This data contained information about the finishers of the Boston marathon of 2017.
 
 **Sample data visualization:** 
 
